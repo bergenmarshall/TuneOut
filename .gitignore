@@ -1,0 +1,11 @@
+*.csv
+*.pt
+__pycache__
+*.jsonl
+results
+plots
+logs
+fine-tuned-*
+.ipynb_checkpoints
+env
+*.log

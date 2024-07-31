@@ -1,0 +1,12 @@
+transformers @ git+https://github.com/huggingface/transformers@main
+torch
+datasets
+protobuf==3.20
+accelerate
+bitsandbytes
+matplotlib
+scikit-learn
+tqdm
+huggingface_hub
+pandas
+numpy
