@@ -1,6 +1,18 @@
 import torch
 import numpy as np
 import torch.nn.functional as F
+import zlib as z
+
+def mink(data):
+    logits = data.get("logits")
+    input_ids = data.get("input_ids")
+    input_ids = input_ids[0][1:].unsqueeze(-1)
+    log_probs = F.log_softmax(logits[0, :-1], dim=-1)
+    token_log_probs = log_probs.gather(dim=-1, index=input_ids).squeeze(-1)
+    ratio = 0.6
+    k_length = int(len(token_log_probs) * ratio)
+    topk = np.sort(token_log_probs.cpu())[:k_length]
+    return np.mean(topk).item()
 
 def mink_pp(data):
     logits = data.get("logits")
@@ -16,7 +28,7 @@ def mink_pp(data):
     k_length = int(len(mink_plus) * ratio)
     mp = mink_plus.cpu()
     topk = np.sort(mp)[:k_length]
-    return np.mean(topk).item()# , mink_plus
+    return np.mean(topk).item()
 
 def mink_pp_filter(data):
     logits = data.get("logits")
@@ -34,7 +46,7 @@ def mink_pp_filter(data):
     k_length = int(len(mink_plus) * ratio)
     mp = mink_plus.cpu()
     topk = np.sort(mp)[:k_length]
-    return np.mean(topk).item()# , mink_plus
+    return np.mean(topk).item()
 
 def filter_for_outlier_tokens(logits, input_ids, limit):
     probs = F.softmax(logits, dim=-1)
@@ -72,3 +84,11 @@ def alternative_2(data):
     topk = np.sort(mink_plus.cpu())[:k_length]
     return np.mean(topk).item()
 
+def zlib(data, text):
+    loss = data.get("loss")
+    ll = -loss.item()
+    return ll / len(z.compress(bytes(text, 'utf-8')))
+
+def loss_score(data):
+    loss = data.get("loss")
+    return -loss.item()
